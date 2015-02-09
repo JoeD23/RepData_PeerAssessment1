@@ -12,7 +12,8 @@ output:
 
 Attach packages and set working directory
 
-```{r attachpackages, echo=TRUE}
+
+```r
 library(dplyr)
 library(lubridate)
 library(knitr)
@@ -25,14 +26,16 @@ setwd('~/Cousera/Reproducible Research/RepData_PeerAssessment1')
 
 Unzip and read the data
 
-```{r ReadData}
+
+```r
 unzip("activity.zip")
 data <- read.csv("activity.csv", stringsAsFactors=FALSE, na.strings="NA")
 ```
 
 Calculate summary statistics (the total, mean and median number of steps per day) using the summarise function and then melt into a long data frame.  
 
-```{r Summary}
+
+```r
 stats <- melt(as.data.frame(summarise(group_by(data, date),
                                       Total=sum(steps, na.rm=TRUE), 
                                       Mean=mean(steps, na.rm=TRUE), 
@@ -44,7 +47,8 @@ stats <- melt(as.data.frame(summarise(group_by(data, date),
 
 Also, create day, month and year variables to be used in the histogram and graphic for the report. Finally, create a datetime variable formated as POSIXct for the time series plot.
 
-```{r Processing}
+
+```r
 stats$day <- day(as.POSIXlt(stats$date))
 stats$month <- month(as.POSIXlt(stats$date), label=TRUE, abbr=FALSE)
 stats$year <- year(as.POSIXlt(stats$date)) 
@@ -61,18 +65,22 @@ For this part of the assignment, you can ignore the missing values in the datase
 
 Keep the total rows from the stats data frame
 
-```{r Histogram}
+
+```r
 hist <- hist(stats$steps[stats$Statistic=='Total'], breaks=12,
              xlab="Total Daily Steps",
              ylab="Number of Days",
              main="Total Number of Steps Taken Each Day")
 ```
 
+![plot of chunk Histogram](figure/Histogram-1.png) 
+
 2. Calculate and report the mean and median total number of steps taken per day
 
 Keep the mean and median rows from the stats data frame and then plot the data by day and month
 
-```{r MeanMedian}
+
+```r
 plot <- filter(stats, Statistic=="Mean" | Statistic=="Median")
 
 ggplot(plot, aes(day, month, fill=steps)) + 
@@ -86,6 +94,8 @@ ggplot(plot, aes(day, month, fill=steps)) +
         theme_bw()
 ```
 
+![plot of chunk MeanMedian](figure/MeanMedian-1.png) 
+
 
 ## What is the average daily activity pattern?
 
@@ -94,21 +104,25 @@ and the average number of steps taken, averaged across all days (y-axis)
 
 Calculate the average number of steps taken, averaged across all days and store in data frame.
 
-```{r TimeSeries}
+
+```r
 time <- as.data.frame(summarise(group_by(data, interval), Mean=mean(steps, na.rm=TRUE)))
 
 plot(time$interval, time$Mean, type="l", xlab="Minutes",
      ylab="Average Number of Steps Taken (Average Over Days)")
 ```
 
+![plot of chunk TimeSeries](figure/TimeSeries-1.png) 
+
 2. Which 5-minute interval, on average across all the days in the dataset,
 contains the maximum number of steps?
 
-```{r Max Interval}
+
+```r
 max <- filter(time, Mean==max(time$Mean))
 ```
 
-*The **`r max$interval`** minute interval has an average of **`r format(max$Mean, digits=0)`** steps, the maximum average number of steps.*\n
+*The **835** minute interval has an average of **206** steps, the maximum average number of steps.*\n
 
 
 ## Imputing missing values
@@ -132,18 +146,18 @@ daily number of steps?
 
 Count Missing values in data
 
-```{r CountMiss}
 
+```r
 miss <- as.numeric(sum(is.na(data$steps)))
 ```
 
-*There are a total of **`r miss`** missing values in the dataset.*\n
+*There are a total of **2304** missing values in the dataset.*\n
 
 The 5 minute interval mean will be used to impute missing values in the original dataset.  Merge the means by time data with the original data. If the original steps data is missing then replace it with the interval mean.  Rerun the above code using the Imputed dataset to answer part 4.
 
 
-```{r Impute}
 
+```r
 dataimp <- merge(data, time, by="interval", all.x=TRUE)
 dataimp$steps <- ifelse(is.na(dataimp$steps), dataimp$Mean, dataimp$steps)
 
@@ -163,7 +177,11 @@ histimp <- hist(statsimp$steps[statsimp$Statistic=='Total'], breaks=12,
                 xlab="Total Daily Steps",
                 ylab="Number of Days",
                 main="Total Number of Steps Taken Each Day\n (Imputed Data)")
+```
 
+![plot of chunk Impute](figure/Impute-1.png) 
+
+```r
 plotimp <- filter(statsimp, Statistic=="Mean" | Statistic=="Median")
 
 ggplot(plotimp, aes(day, month, fill=steps)) + 
@@ -177,11 +195,13 @@ ggplot(plotimp, aes(day, month, fill=steps)) +
         theme_bw()
 ```
 
+![plot of chunk Impute](figure/Impute-2.png) 
+
 
 *The 8 days with NA as the median and mean number of steps now have a median number of steps equal to 34 and a mean number of steps equal to 37.  The mean and median number of steps for all of the other days remains the same. Note,the distribution of the total number of steps is no longer bimodal.*
 
-```{r Compare}
 
+```r
 par(mfrow=c(1,2))
 plot(histimp, xlab="Total Daily Steps", 
               ylab="Number of Days", ylim=c(0,25),
@@ -189,6 +209,11 @@ plot(histimp, xlab="Total Daily Steps",
 plot(hist, xlab="Total Daily Steps",
            ylab="Number of Days", ylim=c(0,25),
            main="Total Number of Daily Steps\n")
+```
+
+![plot of chunk Compare](figure/Compare-1.png) 
+
+```r
 par(mfrow=c(1,1))
 ```
 
@@ -203,8 +228,8 @@ with the filled-in missing values for this part.
 and "weekend" indicating whether a given date is a weekday or weekend
 day.
 
-```{r Weekend}
 
+```r
 dataimp$wday <- wday(dataimp$date, label=TRUE, abbr=FALSE)
 dataimp$weekend <- as.factor(ifelse(dataimp$wday=="Saturday" | dataimp$wday=="Sunday",
                               "Weekend", "Weekday"))
@@ -216,8 +241,8 @@ dataimp$weekend <- as.factor(ifelse(dataimp$wday=="Saturday" | dataimp$wday=="Su
 across all weekday days or weekend days (y-axis).
 
 
-```{r TimeSeries2}
 
+```r
 time2 <- as.data.frame(summarise(group_by(dataimp, interval, weekend),
                                  Mean=mean(steps)))
 
@@ -226,6 +251,8 @@ xyplot(Mean ~ interval | weekend, data=time2,
        strip=strip.custom(bg="pink"),
        xlab="Interval", ylab="Number of steps")
 ```
+
+![plot of chunk TimeSeries2](figure/TimeSeries2-1.png) 
 
 
 *In general, there is more activity during the middle of the day on the weekends compared to the weekdays.*
