@@ -1,11 +1,4 @@
----
-title: 'Reproducible Research: Peer Assessment 1'
-output:
-  html_document:
-    keep_md: yes
-  pdf_document: default
-  word_document: default
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
@@ -15,12 +8,48 @@ Attach packages and set working directory
 
 ```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(lubridate)
+```
+
+```
+## Warning: package 'lubridate' was built under R version 3.1.2
+```
+
+```r
 library(knitr)
+```
+
+```
+## Warning: package 'knitr' was built under R version 3.1.2
+```
+
+```r
 library(reshape2)
 library(ggplot2)
 library(lattice)
+```
 
+```
+## Warning: package 'lattice' was built under R version 3.1.2
+```
+
+```r
 setwd('~/Cousera/Reproducible Research/RepData_PeerAssessment1')
 ```
 
@@ -73,7 +102,7 @@ hist <- hist(stats$steps[stats$Statistic=='Total'], breaks=12,
              main="Total Number of Steps Taken Each Day")
 ```
 
-![plot of chunk Histogram](figure/Histogram-1.png) 
+![](PA1_template_files/figure-html/Histogram-1.png) 
 
 2. Calculate and report the mean and median total number of steps taken per day
 
@@ -94,7 +123,7 @@ ggplot(plot, aes(day, month, fill=steps)) +
         theme_bw()
 ```
 
-![plot of chunk MeanMedian](figure/MeanMedian-1.png) 
+![](PA1_template_files/figure-html/MeanMedian-1.png) 
 
 
 ## What is the average daily activity pattern?
@@ -112,7 +141,7 @@ plot(time$interval, time$Mean, type="l", xlab="Minutes",
      ylab="Average Number of Steps Taken (Average Over Days)")
 ```
 
-![plot of chunk TimeSeries](figure/TimeSeries-1.png) 
+![](PA1_template_files/figure-html/TimeSeries-1.png) 
 
 2. Which 5-minute interval, on average across all the days in the dataset,
 contains the maximum number of steps?
@@ -179,7 +208,7 @@ histimp <- hist(statsimp$steps[statsimp$Statistic=='Total'], breaks=12,
                 main="Total Number of Steps Taken Each Day\n (Imputed Data)")
 ```
 
-![plot of chunk Impute](figure/Impute-1.png) 
+![](PA1_template_files/figure-html/Impute-1.png) 
 
 ```r
 plotimp <- filter(statsimp, Statistic=="Mean" | Statistic=="Median")
@@ -195,7 +224,7 @@ ggplot(plotimp, aes(day, month, fill=steps)) +
         theme_bw()
 ```
 
-![plot of chunk Impute](figure/Impute-2.png) 
+![](PA1_template_files/figure-html/Impute-2.png) 
 
 
 *The 8 days with NA as the median and mean number of steps now have a median number of steps equal to 34 and a mean number of steps equal to 37.  The mean and median number of steps for all of the other days remains the same. Note,the distribution of the total number of steps is no longer bimodal.*
@@ -211,7 +240,7 @@ plot(hist, xlab="Total Daily Steps",
            main="Total Number of Daily Steps\n")
 ```
 
-![plot of chunk Compare](figure/Compare-1.png) 
+![](PA1_template_files/figure-html/Compare-1.png) 
 
 ```r
 par(mfrow=c(1,1))
@@ -252,7 +281,7 @@ xyplot(Mean ~ interval | weekend, data=time2,
        xlab="Interval", ylab="Number of steps")
 ```
 
-![plot of chunk TimeSeries2](figure/TimeSeries2-1.png) 
+![](PA1_template_files/figure-html/TimeSeries2-1.png) 
 
 
 *In general, there is more activity during the middle of the day on the weekends compared to the weekdays.*
