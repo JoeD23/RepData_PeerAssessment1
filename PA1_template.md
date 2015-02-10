@@ -1,5 +1,9 @@
-# Reproducible Research: Peer Assessment 1
-
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---    
 
 ## Loading and preprocessing the data
 
@@ -33,13 +37,6 @@ library(lubridate)
 
 ```r
 library(knitr)
-```
-
-```
-## Warning: package 'knitr' was built under R version 3.1.2
-```
-
-```r
 library(reshape2)
 library(ggplot2)
 library(lattice)
@@ -102,7 +99,7 @@ hist <- hist(stats$steps[stats$Statistic=='Total'], breaks=12,
              main="Total Number of Steps Taken Each Day")
 ```
 
-![](PA1_template_files/figure-html/Histogram-1.png) 
+![plot of chunk TotalSteps](figure/TotalSteps-1.png) 
 
 2. Calculate and report the mean and median total number of steps taken per day
 
@@ -123,7 +120,7 @@ ggplot(plot, aes(day, month, fill=steps)) +
         theme_bw()
 ```
 
-![](PA1_template_files/figure-html/MeanMedian-1.png) 
+![plot of chunk MeanMedian](figure/MeanMedian-1.png) 
 
 
 ## What is the average daily activity pattern?
@@ -141,17 +138,19 @@ plot(time$interval, time$Mean, type="l", xlab="Minutes",
      ylab="Average Number of Steps Taken (Average Over Days)")
 ```
 
-![](PA1_template_files/figure-html/TimeSeries-1.png) 
+![plot of chunk TimeSeries](figure/TimeSeries-1.png) 
+
 
 2. Which 5-minute interval, on average across all the days in the dataset,
 contains the maximum number of steps?
+
 
 
 ```r
 max <- filter(time, Mean==max(time$Mean))
 ```
 
-*The **835** minute interval has an average of **206** steps, the maximum average number of steps.*\n
+*The 835 minute interval has an average of 206 steps, the maximum average number of steps.*
 
 
 ## Imputing missing values
@@ -176,11 +175,12 @@ daily number of steps?
 Count Missing values in data
 
 
+
 ```r
 miss <- as.numeric(sum(is.na(data$steps)))
 ```
 
-*There are a total of **2304** missing values in the dataset.*\n
+*There are a total of 2304 missing values in the dataset.*\n
 
 The 5 minute interval mean will be used to impute missing values in the original dataset.  Merge the means by time data with the original data. If the original steps data is missing then replace it with the interval mean.  Rerun the above code using the Imputed dataset to answer part 4.
 
@@ -208,7 +208,7 @@ histimp <- hist(statsimp$steps[statsimp$Statistic=='Total'], breaks=12,
                 main="Total Number of Steps Taken Each Day\n (Imputed Data)")
 ```
 
-![](PA1_template_files/figure-html/Impute-1.png) 
+![plot of chunk Impute](figure/Impute-1.png) 
 
 ```r
 plotimp <- filter(statsimp, Statistic=="Mean" | Statistic=="Median")
@@ -224,10 +224,10 @@ ggplot(plotimp, aes(day, month, fill=steps)) +
         theme_bw()
 ```
 
-![](PA1_template_files/figure-html/Impute-2.png) 
-
+![plot of chunk Impute](figure/Impute-2.png) 
 
 *The 8 days with NA as the median and mean number of steps now have a median number of steps equal to 34 and a mean number of steps equal to 37.  The mean and median number of steps for all of the other days remains the same. Note,the distribution of the total number of steps is no longer bimodal.*
+
 
 
 ```r
@@ -240,12 +240,11 @@ plot(hist, xlab="Total Daily Steps",
            main="Total Number of Daily Steps\n")
 ```
 
-![](PA1_template_files/figure-html/Compare-1.png) 
+![plot of chunk TotalStepsImp](figure/TotalStepsImp-1.png) 
 
 ```r
 par(mfrow=c(1,1))
 ```
-
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -256,6 +255,7 @@ with the filled-in missing values for this part.
 1. Create a new factor variable in the dataset with two levels - "weekday"
 and "weekend" indicating whether a given date is a weekday or weekend
 day.
+
 
 
 ```r
@@ -281,8 +281,7 @@ xyplot(Mean ~ interval | weekend, data=time2,
        xlab="Interval", ylab="Number of steps")
 ```
 
-![](PA1_template_files/figure-html/TimeSeries2-1.png) 
+![plot of chunk TimeSeriesImp](figure/TimeSeriesImp-1.png) 
 
 
-*In general, there is more activity during the middle of the day on the weekends compared to the weekdays.*
-
+*In general, there is less activity in the morning and more activity during the middle of the day on the weekends compared to the weekdays.*
