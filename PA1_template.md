@@ -12,41 +12,10 @@ Attach packages and set working directory
 
 ```r
 library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 library(lubridate)
-```
-
-```
-## Warning: package 'lubridate' was built under R version 3.1.2
-```
-
-```r
 library(knitr)
-library(reshape2)
-library(ggplot2)
 library(lattice)
-```
 
-```
-## Warning: package 'lattice' was built under R version 3.1.2
-```
-
-```r
 setwd('~/Cousera/Reproducible Research/RepData_PeerAssessment1')
 ```
 
@@ -58,27 +27,21 @@ unzip("activity.zip")
 data <- read.csv("activity.csv", stringsAsFactors=FALSE, na.strings="NA")
 ```
 
-Calculate summary statistics (the total, mean and median number of steps per day) using the summarise function and then melt into a long data frame.  
+Calculate the total number of steps per day and the mean and median total number of steps per day using the summarise function.  
 
 
 ```r
-stats <- melt(as.data.frame(summarise(group_by(data, date),
-                                      Total=sum(steps, na.rm=TRUE), 
-                                      Mean=mean(steps, na.rm=TRUE), 
-                                      Median=median(steps, na.rm=TRUE))),
-                measure.vars=c("Total", "Mean","Median"),
-                variable.name="Statistic",
-                value.name="steps")
+total <- as.data.frame(summarise(group_by(data, date), 
+                                 steps=sum(steps, na.rm=TRUE)))
+
+stats <- summarize(total, Mean=mean(steps, na.rm=TRUE),
+                          Median=median(steps, na.rm=TRUE))
 ```
 
-Also, create day, month and year variables to be used in the histogram and graphic for the report. Finally, create a datetime variable formated as POSIXct for the time series plot.
+Also, create a datetime variable formated as POSIXct for the time series plot.
 
 
 ```r
-stats$day <- day(as.POSIXlt(stats$date))
-stats$month <- month(as.POSIXlt(stats$date), label=TRUE, abbr=FALSE)
-stats$year <- year(as.POSIXlt(stats$date)) 
-
 data$datetime <- as.POSIXct(data$date, format="%Y-%m-%d") + minutes(data$interval)
 ```
 
@@ -89,11 +52,10 @@ For this part of the assignment, you can ignore the missing values in the datase
 
 1. Make a histogram of the total number of steps taken each day 
 
-Keep the total rows from the stats data frame
 
 
 ```r
-hist <- hist(stats$steps[stats$Statistic=='Total'], breaks=12,
+hist <- hist(total$steps, breaks=12,
              xlab="Total Daily Steps",
              ylab="Number of Days",
              main="Total Number of Steps Taken Each Day")
@@ -103,24 +65,7 @@ hist <- hist(stats$steps[stats$Statistic=='Total'], breaks=12,
 
 2. Calculate and report the mean and median total number of steps taken per day
 
-Keep the mean and median rows from the stats data frame and then plot the data by day and month
-
-
-```r
-plot <- filter(stats, Statistic=="Mean" | Statistic=="Median")
-
-ggplot(plot, aes(day, month, fill=steps)) + 
-        geom_tile(colour = "white") + 
-        scale_fill_gradient(low="red", high="green") +
-        geom_text(aes(day, month, label=format(steps, digits=0), size=0.5, angle=90)) +
-        guides(size=FALSE) +
-        facet_grid(Statistic ~ .) + 
-        labs(x="Day of Month", y=paste("Year ", stats$year), 
-            title="Mean and Median Total Number of Steps Per Day") +
-        theme_bw()
-```
-
-![plot of chunk MeanMedian](figure/MeanMedian-1.png) 
+*The mean total number of daily steps is 9354 and the median number of daily steps is 10395.*
 
 
 ## What is the average daily activity pattern?
@@ -190,19 +135,13 @@ The 5 minute interval mean will be used to impute missing values in the original
 dataimp <- merge(data, time, by="interval", all.x=TRUE)
 dataimp$steps <- ifelse(is.na(dataimp$steps), dataimp$Mean, dataimp$steps)
 
-statsimp <- melt(as.data.frame(summarise(group_by(dataimp, date),
-                                         Total=sum(steps), 
-                                         Mean=mean(steps), 
-                                         Median=median(steps))),
-                 measure.vars=c("Total", "Mean","Median"),
-                 variable.name="Statistic",
-                 value.name="steps")
+totalimp <- as.data.frame(summarise(group_by(dataimp, date), 
+                                    steps=sum(steps)))
 
-statsimp$day <- day(as.POSIXlt(statsimp$date))
-statsimp$month <- month(as.POSIXlt(statsimp$date), label=TRUE, abbr=FALSE)
-statsimp$year <- year(as.POSIXlt(statsimp$date)) 
+statsimp <- summarize(totalimp, Mean=mean(steps),
+                                Median=median(steps))
 
-histimp <- hist(statsimp$steps[statsimp$Statistic=='Total'], breaks=12,
+histimp <- hist(totalimp$steps, breaks=12,
                 xlab="Total Daily Steps",
                 ylab="Number of Days",
                 main="Total Number of Steps Taken Each Day\n (Imputed Data)")
@@ -210,41 +149,7 @@ histimp <- hist(statsimp$steps[statsimp$Statistic=='Total'], breaks=12,
 
 ![plot of chunk Impute](figure/Impute-1.png) 
 
-```r
-plotimp <- filter(statsimp, Statistic=="Mean" | Statistic=="Median")
-
-ggplot(plotimp, aes(day, month, fill=steps)) + 
-        geom_tile(colour = "white") + 
-        scale_fill_gradient(low="red", high="green") +
-        geom_text(aes(day, month, label=format(steps, digits=0), size=0.5, angle=90)) +
-        guides(size=FALSE) +
-        facet_grid(Statistic ~ .) + 
-        labs(x="Day of Month", y=paste("Year ", statsimp$year), 
-            title="Mean and Median Total Number of Steps Per Day (Imputed Data)") +
-        theme_bw()
-```
-
-![plot of chunk Impute](figure/Impute-2.png) 
-
-*The 8 days with NA as the median and mean number of steps now have a median number of steps equal to 34 and a mean number of steps equal to 37.  The mean and median number of steps for all of the other days remains the same. Note,the distribution of the total number of steps is no longer bimodal.*
-
-
-
-```r
-par(mfrow=c(1,2))
-plot(histimp, xlab="Total Daily Steps", 
-              ylab="Number of Days", ylim=c(0,25),
-              main="Total Number of Daily Steps\n(Imputed Data)")
-plot(hist, xlab="Total Daily Steps",
-           ylab="Number of Days", ylim=c(0,25),
-           main="Total Number of Daily Steps\n")
-```
-
-![plot of chunk TotalStepsImp](figure/TotalStepsImp-1.png) 
-
-```r
-par(mfrow=c(1,1))
-```
+*The mean and median number of steps without imputation was 9354 and 10395, respectively, while the mean and median number of step with imputation was 10766 and 10766, respectively.*
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
